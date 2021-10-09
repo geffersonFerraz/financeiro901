@@ -1,11 +1,10 @@
 import express from 'express';
 import { appLogger, errorLogger } from './logger';
 import router from './router';
-
-import Telegram from './telegram';
+import TelegramBOT from './telegram';
 
 const app = express();
-const telegram = Telegram();
+const telegram = TelegramBOT();
 
 app.disable('etag');
 app.use(express.json());

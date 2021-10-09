@@ -12,6 +12,9 @@ This app uses the following key technologies:
 
 ## Setup
 
+Create a new Group at Telegram and add @Financeiro901_bot, or just call @Financeiro901_bot.
+
+
 Use `nvm` to install the correct version of node:
 ```shell script
 nvm install
