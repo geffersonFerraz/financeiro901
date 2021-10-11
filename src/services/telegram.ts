@@ -3,6 +3,7 @@ import fs from 'fs';
 import moment from 'moment';
 import { GroupsService } from '.';
 import TelegramBot from 'node-telegram-bot-api';
+import path from 'path';
 
 export const handleSaldo = async (bot: TelegramBot, msg: any) => {
     bot.sendMessage(msg.chat.id, 'Saldo');
@@ -27,22 +28,22 @@ export const handleExtrato = async (bot: TelegramBot, msg: any) => {
 
 export const handlePessoal = async (bot: TelegramBot, msg: any) => {
     const PDFGen = new pdfkit();
-    PDFGen.pipe(fs.createWriteStream('teste.pdf'));
-    PDFGen.text(`${moment().format('MMMM Do YYYY, h:mm:ss a')}`)
-    PDFGen.text('Some awesome example text')
-    PDFGen.end();
+    const fileName = `Extrato_Pessoal_${msg.from.first_name}_${moment().format('DD-MM-YYYY_hh-mm-ss')}.pdf`;
+    await PDFGen.pipe(fs.createWriteStream(`./pdfs/${fileName}`));
+    await PDFGen.text(`${moment().format('MMMM Do YYYY, hh:mm:ss a')}`)
+    await PDFGen.text('Some awesome example text')
+    await PDFGen.end();
 
-    const file = './teste.pdf';
-    // const parsed = path.parse(file); import path from 'path';
-    const stream = fs.createReadStream(file);
+    const stream = fs.createReadStream(`./pdfs/${fileName}`);
     const fileOptions: any = {
-        filename: `Extrato_Pessoal_${moment().format('DD-MM-YYYY_h-mm-ss')}.pdf`,
+        filename: fileName,
         contentType: 'application/pdf',
     };
 
     console.log(fileOptions)
-    bot.sendMessage(msg.chat.id, `Segue seu PDF: ${fileOptions.filename}`);
+    await bot.sendMessage(msg.chat.id, `Segue seu PDF: ${fileOptions.filename}`);
     await bot.sendDocument(msg.chat.id, stream, {}, fileOptions);
+    await fs.unlinkSync(`./pdfs/${fileName}`)
 
 }
 
@@ -55,41 +56,49 @@ export const handleComandos = async (bot: TelegramBot, msg: any) => {
     return resp
 }
 
+export const handleCadastro = async (bot: TelegramBot, msg: any) => {
+    const {id} = await GroupsService.create({name: msg.chat.title, telegramId: msg.chat.id})
+    bot.sendMessage(msg.chat.id, `Olá ${msg.from.first_name}, seu grupo *${msg.chat.title}* foi incluido com sucesso.`);
+    bot.sendMessage(msg.chat.id, `Id de controle: ${id}`);
+    // console.log(msg)
+}
+
+
 export const COMMANDS = [
     {
         name: 'saldo',
         command: '/saldo',
         description: 'O comando trás xpto',
         descriptionDetail: 'O comando /saldo trás xpto',
-        handle: handleComandos
+        handle: handleSaldo
     },
     {
         name: 'credito',
         command: '/credito',
         description: 'O comando trás xpto',
         descriptionDetail: 'O comando /credito trás xpto',
-        handle: handleComandos
+        handle: handleCredito
     },
     {
         name: 'debito',
         command: '/debito',
         description: 'O comando trás xpto',
         descriptionDetail: 'O comando /debito trás xpto',
-        handle: handleComandos
+        handle: handleDebito
     },
     {
         name: 'extrato',
         command: '/extrato',
         description: 'O comando trás xpto',
         descriptionDetail: 'O comando /extrato trás xpto',
-        handle: handleComandos
+        handle: handleExtrato
     },
     {
         name: 'saldopessoal',
         command: '/saldopessoal',
         description: 'O comando trás xpto',
         descriptionDetail: 'O comando /saldopessoal trás xpto',
-        handle: handleComandos
+        handle: handlePessoal
     },
     {
         name: 'comandos',
@@ -97,6 +106,14 @@ export const COMMANDS = [
         description: 'O comando trás xpto',
         descriptionDetail: 'O comando /comandos trás xpto',
         handle: handleComandos
+    },
+    {
+        name: 'cadastrar',
+        command: '/cadastrar',
+        description: 'O comando realiza o cadastro do grupo ou usuário.',
+        descriptionDetail: 'O comando /cadastrar realiza o cadastro do grupo ou usuário.',
+        handle: handleCadastro
+
     }
 ]
 

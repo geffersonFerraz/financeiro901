@@ -6,9 +6,20 @@ export class Group extends Base {
   id!: Id;
   nome!: string;
   telegramId!: string;
-  walletId!: Wallet;
+  walletId?: Wallet;
+  created_at?: string;
+  updated_at?: string;
 
   static tableName = 'groups';
+
+  $beforeInsert() {
+    this.created_at = new Date().toISOString();
+    this.updated_at = new Date().toISOString();
+  }
+
+  $beforeUpdate() {
+    this.updated_at = new Date().toISOString();
+  }
 
   // $beforeInsert(){
   //   this.volume = this.width * this.height * this.depth;

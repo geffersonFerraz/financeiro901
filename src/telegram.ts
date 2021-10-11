@@ -4,15 +4,15 @@ import { config } from './config';
 import { TelegramService } from './services';
 
 
-export const TelegramBOT = () => {
+export const TelegramBOT = async () => {
 
     const token = config.telegramToken;
     const bot = new TelegramBot(token, { polling: true });
    
-    bot.onText(/\//, async (msg: any) => {
+    await bot.onText(/\//, async (msg: any) => {
         const inputText = msg.text;
 
-        TelegramService.COMMANDS.forEach(async item => {
+        await TelegramService.COMMANDS.forEach(async(item)  => {
             if (item.command == inputText){
                 await item.handle(bot, msg)
             }
